@@ -1,0 +1,27 @@
+スパムアカウント
+https://www.facebook.com/people/%E6%A3%AE%E6%9C%AC%E8%B6%8A%E4%B8%96/100006222276364
+
+森本越世
+
+
+餌食になっている人
+
+香田孝広
+
+http://www.verious.com/qa/google-image-search-how-do-i-construct-a-reverse-image-search-url/
+
+
+import javax.xml.bind.DatatypeConverter;
+...
+            Path p = Paths.get("my_photo.JPG");
+            try(InputStream in = Files.newInputStream(p); 
+                    PrintWriter write = new PrintWriter("base64.txt");
+               ) {
+                byte [] bytes = new byte[in.available()];
+                in.read(bytes);
+                String base64 = DatatypeConverter.printBase64Binary(bytes);
+                write.println(base64);
+ 
+            } catch(IOException ex) {
+                ex.printStackTrace();
+            }
