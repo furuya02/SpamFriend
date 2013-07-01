@@ -158,7 +158,6 @@
             this.webBrowser.Size = new System.Drawing.Size(503, 459);
             this.webBrowser.TabIndex = 0;
             this.webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_DocumentCompleted);
-            this.webBrowser.NewWindow += new System.ComponentModel.CancelEventHandler(this.webBrowser_NewWindow);
             // 
             // timer1
             // 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -10,6 +11,7 @@ namespace SpamFriend{
 
         private int _size;
         private Color _color;
+        List<OneFriend> _listFriend = new List<OneFriend>(); 
 
 
         public MainForm(){
@@ -38,6 +40,21 @@ namespace SpamFriend{
                 return;
             }
             var target = s.Substring(start);
+
+            /***/
+            const string parseStr = "<div class=\"clearfix\">";
+            var lines = target.Split(new[]{parseStr},StringSplitOptions.RemoveEmptyEntries);
+            foreach (var l in lines) {
+                var o = new OneFriend();
+                if (o.Parse(l)){
+                    _listFriend.Add(o);
+                } else{
+                    o.Parse(l);
+                }
+            }
+
+            /***/
+
             int count = 0;
             while (true){
                 int i = target.IndexOf("src=\"");
@@ -149,8 +166,9 @@ namespace SpamFriend{
         //textBoxのURLでブラウジング開始(スクロールして最後まで取得する)
         private void Start(){
 
-            //listBox.Items.Clear();
+            toolStripStatusLabel1.Text = "";
             listView.Items.Clear();
+            _listFriend.Clear();
 
             if (textBoxUrl.Text.IndexOf("profile.php?id=") != -1){
                 if (textBoxUrl.Text.IndexOf("&sk=friends") == -1) {
@@ -188,13 +206,19 @@ namespace SpamFriend{
             //友達一覧
             SearchFriend();
 
-            toolStripStatusLabel1.Text = String.Format("すべての友達 {0}",listView.Items.Count);
+            toolStripStatusLabel1.Text = String.Format("すべての友達 {0} {1}", listView.Items.Count, _listFriend.Count);
 
             //デバッグため色を付けてみる
             if (listView.Items.Count > 0){
                 ListViewItem lvItem = listView.Items[0];
                 lvItem.ForeColor = Color.Red;
             }
+            var sb = new StringBuilder();
+            foreach (var o in _listFriend){
+                var s = String.Format("{0} {1}\r\n", o.Name, o.Url);
+                sb.Append(s);
+            }
+            Clipboard.SetDataObject(sb.ToString(), true);
 
 
         }
@@ -215,9 +239,6 @@ namespace SpamFriend{
 
         }
 
-        private void webBrowser_NewWindow(object sender, System.ComponentModel.CancelEventArgs e){
-            int x = 0;
-        }
 
     }
 }
