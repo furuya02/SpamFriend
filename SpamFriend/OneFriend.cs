@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 
 namespace SpamFriend {
-    class OneFriend{
+    public class OneFriend{
         public String Name { get; private set; }
         public String Jpg { get; private set; }
-        public String Url { get; private set; }
+        public String Key { get; private set; }
         public OneFriend() {
             Name = "";
             Jpg = "";
-            Url = "";
+            Key = "";
         }
         public bool Parse(String str){
             int i;
@@ -60,11 +60,11 @@ namespace SpamFriend {
             str = str.Substring(i+31);
             i = str.IndexOf("/friends");
             if (i != -1){
-                Url = str.Substring(0, i);
+                Key = str.Substring(0, i);
             } else{
                 i = str.IndexOf("sk=friends");
                 if (i != -1){
-                    Url = str.Substring(0, i - 5);
+                    Key = str.Substring(0, i - 5);
                 } else{
                     return false;
                 }
@@ -75,7 +75,7 @@ namespace SpamFriend {
 
         }
         public override String ToString(){
-            return String.Format("{0},{1},{2}", Name, Url, Jpg);
+            return String.Format("{0},{1},{2}", Name, Key, Jpg);
         }
     }
 }

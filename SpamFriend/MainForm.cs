@@ -12,17 +12,22 @@ namespace SpamFriend{
         private int _size;
         private Color _color;
         List<OneFriend> _listFriend = new List<OneFriend>(); 
-
+        ListBlack _listBlack = new ListBlack();
 
         public MainForm(){
             InitializeComponent();
 
             //const string topUrl = "https://www.facebook.com/toshiyuki.katayama.50/friends";
-            const string topUrl = "https://www.facebook.com/";
+            //const string topUrl = "https://www.facebook.com/";
+            const string topUrl = "https://www.facebook.com/emi.oumi";
 
             textBoxUrl.Text = topUrl;
-            timer1.Interval = 1000; //1秒
+            timer1.Interval = 500; //500 counter<6
+            buttonHome_Click(null,null);
+
         }
+
+        public String Target { get; set; }
 
 
         //友達一覧検索
@@ -41,10 +46,9 @@ namespace SpamFriend{
             }
             var target = s.Substring(start);
 
-            /***/
             const string parseStr = "<div class=\"clearfix\">";
-            var lines = target.Split(new[]{parseStr},StringSplitOptions.RemoveEmptyEntries);
-            foreach (var l in lines) {
+            var lines = target.Split(new[]{parseStr}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var l in lines){
                 var o = new OneFriend();
                 if (o.Parse(l)){
                     _listFriend.Add(o);
@@ -53,95 +57,43 @@ namespace SpamFriend{
                 }
             }
 
-            /***/
-
-            int count = 0;
-            while (true){
-                int i = target.IndexOf("src=\"");
-                if (i == -1){
-                    break;
-                }
-                target = target.Substring(i);
-                i = target.IndexOf("\">");
-                if (i == -1){
-                    break;
-                }
-                var url = target.Substring(5, i - 5);
-                try{
-                    var ext = Path.GetExtension(url);
-                    if (ext != null && ext.ToUpper() != ".JPG"){
-                        target = target.Substring(i);
-                        continue;
-                    }
-                } catch (Exception){
-                    target = target.Substring(i);
-                    continue;
-                }
-                target = target.Substring(i);
-
-
-
-                i = target.IndexOf("/ajax/hovercard/user.php?");
-                if (i == -1){
-                    break;
-                }
-                target = target.Substring(i);
-                if (-1 == (i = target.IndexOf(">"))){
-                    break;
-                }
-                target = target.Substring(i);
-                i = target.IndexOf("<");
-                if (i == -1){
-                    break;
-                }
-
-                var name = target.Substring(1, i - 1);
-
-
-//                var imgFile = "$.JPG";
-//                var wc = new WebClient();
-//                wc.DownloadFile(url, imgFile);
-//                wc.Dispose();
-//
-//                var img = Image.FromFile(imgFile);
-//                imageList.Images.Add(img);
-//                img.Dispose();
-//
-//                listView.Items.Add(name, imageList.Images.Count - 1);
-                listView.Items.Add(name,-1);
-
-
-                target = target.Substring(i);
-
-            }
         }
-
+    
 
         //新しいURLに変化した場合、TextBoxを書き換える
-        private void webBrowser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e) {
-            //webBrowser.Document.Body.Style = "zoom:80%"; 
-            var url = e.Url.ToString();
+        private void webBrowser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e){
+            //確認中は処理しない
+            if (!buttonComfirm.Enabled){
+                return;
+            }
+            InitTarget(e.Url.ToString());
+        }
+
+        //Target更新
+        void InitTarget(String url){
             if (url.IndexOf("ai.php?") == -1 && url.IndexOf("/ajax/") == -1) {
-                
-                if (url.IndexOf("profile.php?id=")!=-1){
+
+                if (url.IndexOf("profile.php?id=") != -1) {
                     int i = url.IndexOf("&");
                     if (i != -1) {
                         textBoxUrl.Text = url.Substring(0, i);
-                        listView.Items.Clear();
                     }
-                } else{
+                    Target = textBoxUrl.Text.Substring(25);
+                    Text = String.Format("SpamFriend -{0}-", Target);
+                } else {
                     int i = url.IndexOf("?");
-                    if (i != -1) {
+                    if (i != -1){
                         textBoxUrl.Text = url.Substring(0, i);
-                        listView.Items.Clear();
                     }
+                    Target = textBoxUrl.Text.Substring(25);
+                    Text = String.Format("SpamFriend -{0}-", Target);
                 }
-                
             }
         }
 
 
         //タイマー処理 1秒後にサイズが変わっていたら下スクロールしてAjaxを起動させる
+        private int counter=0;
         private void timer1_Tick(object sender, EventArgs e){
             if (webBrowser.Document == null){
                 return;
@@ -156,89 +108,123 @@ namespace SpamFriend{
             if (len != _size){
                 _size = len;
                 webBrowser.Document.Window.ScrollTo(0, 500000);
+                counter = 0;
             } else{
-                Stop();
+                counter++;
+                if (counter < 6){
+                    return;
+                }
+                
+                timer1.Enabled = false;
+
+                //フィニッシュ
+                //スクロールを一番上に戻す
+                webBrowser.Document.Window.ScrollTo(0, 0);
+
+                //ボタン状態
+                ButtonInit(false);
+
+                //友達一覧
+                SearchFriend();
+
+                var dlg = new ComfirmDlg(_listFriend, _listBlack,this);
+                dlg.ShowDialog();
+
             }
 
         }
 
+        void ButtonInit(bool sw){
+            if (sw){//検索中
+                textBoxUrl.Enabled = false;
+                buttonComfirm.Enabled = false;
+                buttonBack.Enabled = false;
+                buttonForward.Enabled = false;
+                buttonHome.Enabled = false;
+                buttonRefresh.Enabled = false;
+                buttonStop.Enabled = true;
+                panel1.BackColor = Color.Red;
+                panel1.Enabled = false;
+                panel1.Cursor = Cursors.WaitCursor;
 
-        //textBoxのURLでブラウジング開始(スクロールして最後まで取得する)
-        private void Start(){
+            } else{
+                textBoxUrl.Enabled = true;
+                buttonComfirm.Enabled = true;
+                buttonBack.Enabled = true;
+                buttonForward.Enabled = true;
+                buttonHome.Enabled = true;
+                buttonRefresh.Enabled = true;
+                buttonStop.Enabled = false;
+                panel1.BackColor = _color;
+                panel1.Enabled = true;
+                panel1.Cursor= Cursors.Default;
+            }
+            
+        }
 
-            toolStripStatusLabel1.Text = "";
-            listView.Items.Clear();
+
+
+
+        //戻る
+        private void buttonBack_Click(object sender, EventArgs e) {
+            webBrowser.GoBack();
+        }
+        //停止
+        private void buttonStop_Click(object sender, EventArgs e) {
+            webBrowser.Stop();
+            timer1.Enabled = false;
+            ButtonInit(false);
+        }
+
+        //更新
+        private void buttonRefresh_Click(object sender, EventArgs e){
+            InitTarget(textBoxUrl.Text);
+            webBrowser.Navigate(textBoxUrl.Text);
+        }
+        //ホーム
+        private void buttonHome_Click(object sender, EventArgs e) {
+            textBoxUrl.Text = "https://www.facebook.com/";
+            webBrowser.Navigate(textBoxUrl.Text);
+
+        }
+        //進む
+        private void buttonForward_Click(object sender, EventArgs e){
+            webBrowser.GoForward();
+        }
+        //確認
+        private void buttonComfirm_Click(object sender, EventArgs e) {
+            //ボタン状態
+            ButtonInit(true);
+
             _listFriend.Clear();
+            var url = "https://www.facebook.com/friends";
 
-            if (textBoxUrl.Text.IndexOf("profile.php?id=") != -1){
-                if (textBoxUrl.Text.IndexOf("&sk=friends") == -1) {
-                    textBoxUrl.Text = textBoxUrl.Text + @"&sk=friends";
-                }
-            } else {
-                if (textBoxUrl.Text.IndexOf("/friends") == -1) {
-                    textBoxUrl.Text = textBoxUrl.Text + @"/friends";
+            if (Target != null && Target != "") {
+                url = String.Format("https://www.facebook.com/{0}/friends", Target);
+                if (Target.IndexOf("profile.php?id=") >= 0) {
+                    url = String.Format("https://www.facebook.com/{0}&sk=friends", Target);
                 }
             }
 
 
-
-            //ボタン状態
-            buttonSearch.Enabled = false;
-            buttonStop.Enabled = true;
-            _color = panel1.BackColor;
-            panel1.BackColor = Color.Red;
-
-            webBrowser.Navigate(textBoxUrl.Text);
+            webBrowser.Navigate(url);
             _size = 0;
+            counter = 0;
             timer1.Enabled = true;
         }
 
-        private void Stop(){
-            timer1.Enabled = false;
-            //スクロールを一番上に戻す
-            webBrowser.Document.Window.ScrollTo(0, 0);
-
-            //ボタン状態
-            buttonSearch.Enabled = true;
-            buttonStop.Enabled = false;
-            panel1.BackColor = _color;
-
-            //友達一覧
-            SearchFriend();
-
-            toolStripStatusLabel1.Text = String.Format("すべての友達 {0} {1}", listView.Items.Count, _listFriend.Count);
-
-            //デバッグため色を付けてみる
-            if (listView.Items.Count > 0){
-                ListViewItem lvItem = listView.Items[0];
-                lvItem.ForeColor = Color.Red;
-            }
-            var sb = new StringBuilder();
-            foreach (var o in _listFriend){
-                var s = String.Format("{0} {1}\r\n", o.Name, o.Url);
-                sb.Append(s);
-            }
-            Clipboard.SetDataObject(sb.ToString(), true);
-
-
+        //ブラッグリスト
+        private void buttonBlackList_Click(object sender, EventArgs e){
+            var dlg = new BlackListDlg(_listBlack);
+            dlg.ShowDialog();
         }
 
-        private void buttonBack_Click(object sender, EventArgs e){
-            webBrowser.GoBack();
+        private void toolStrip1_DragEnter(object sender, DragEventArgs e) {
+            e.Effect = DragDropEffects.All;
         }
 
-        private void buttonStart_Click(object sender, EventArgs e){
-            Start();
-
+        private void toolStrip1_DragDrop(object sender, DragEventArgs e) {
+            textBoxUrl.Text = (String)e.Data.GetData(DataFormats.Text);
         }
-
-
-        private void buttonStop_Click(object sender, EventArgs e){
-            webBrowser.Stop();
-            Stop();
-
-        }
-
-
     }
 }
