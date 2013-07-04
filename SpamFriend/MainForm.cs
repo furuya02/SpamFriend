@@ -12,11 +12,15 @@ namespace SpamFriend{
 
         private int _size;
         private Color _color;
-        List<OneFriend> _listFriend = new List<OneFriend>(); 
-        ListBlack _listBlack = new ListBlack();
+        readonly List<OneFriend> _listFriend = new List<OneFriend>();
+        readonly ListBlack _listBlack;
+        private readonly Progress _progress;
 
         public MainForm(){
             InitializeComponent();
+
+            _progress = new Progress(progressBar);
+            _listBlack = new ListBlack(listViewBlack);
 
             //const string topUrl = "https://www.facebook.com/toshiyuki.katayama.50/friends";
             //const string topUrl = "https://www.facebook.com/";
@@ -55,7 +59,7 @@ namespace SpamFriend{
                 if (o.Parse(l)){
                     _listFriend.Add(o);
                 } else{
-                    o.Parse(l);
+//                    o.Parse(l);
                 }
             }
 
@@ -91,7 +95,7 @@ namespace SpamFriend{
         }
 
         void SetTarget(){
-            listView.Items.Clear();
+            listViewFriend.Items.Clear();
             imageListFriend.Images.Clear();
 
             Target = textBoxUrl.Text.Substring(25);
@@ -138,13 +142,17 @@ namespace SpamFriend{
                 SearchFriend();
 
                 //タブを切り替える
-                tabControl1.SelectedIndex = 1;
+                tabControl.SelectedIndex = 1;
 
+  
                 //リストビューに展開する
+                _progress.Init(_listFriend.Count);
+
+
                 var countSpam = 0;
                 var i = 0;
                 foreach (var a in _listFriend) {
-                    var item = listView.Items.Add(a.Name, i++);
+                    var item = listViewFriend.Items.Add(a.Name, i++);
                     item.SubItems.Add(a.Key);
                     item.SubItems.Add(a.Jpg);
                     imageListFriend.Images.Add(a.Image);
@@ -152,8 +160,10 @@ namespace SpamFriend{
                         item.ForeColor = Color.Red;
                         countSpam++;
                     }
-
+                    _progress.Inc();
                 }
+                _progress.Finish();
+
                 statusLabel.Text = String.Format("すべての友達 {0} スパムアカウント {1}", _listFriend.Count, countSpam);
                 
                 //デバッグ情報
@@ -206,12 +216,12 @@ namespace SpamFriend{
 
         //戻る
         private void buttonBack_Click(object sender, EventArgs e) {
-            tabControl1.SelectedIndex = 0;
+            tabControl.SelectedIndex = 0;
             webBrowser.GoBack();
         }
         //停止
         private void buttonStop_Click(object sender, EventArgs e) {
-            tabControl1.SelectedIndex = 0;
+            tabControl.SelectedIndex = 0;
             webBrowser.Stop();
             timer1.Enabled = false;
             ButtonInit(false);
@@ -219,20 +229,20 @@ namespace SpamFriend{
 
         //更新
         private void buttonRefresh_Click(object sender, EventArgs e){
-            tabControl1.SelectedIndex = 0;
+            tabControl.SelectedIndex = 0;
             InitTarget(textBoxUrl.Text);
             webBrowser.Navigate(textBoxUrl.Text);
         }
         //ホーム
         private void buttonHome_Click(object sender, EventArgs e){
-            tabControl1.SelectedIndex = 0;
+            tabControl.SelectedIndex = 0;
             textBoxUrl.Text = "https://www.facebook.com/";
             webBrowser.Navigate(textBoxUrl.Text);
 
         }
         //進む
         private void buttonForward_Click(object sender, EventArgs e){
-            tabControl1.SelectedIndex = 0;
+            tabControl.SelectedIndex = 0;
             webBrowser.GoForward();
         }
         //確認
@@ -241,7 +251,7 @@ namespace SpamFriend{
             ButtonInit(true);
 
             //タブを切り替える
-            tabControl1.SelectedIndex = 0;
+            tabControl.SelectedIndex = 0;
 
             _listFriend.Clear();
             var url = "https://www.facebook.com/friends";
@@ -262,8 +272,8 @@ namespace SpamFriend{
 
         //ブラッグリスト
         private void buttonBlackList_Click(object sender, EventArgs e){
-            var dlg = new BlackListDlg(_listBlack);
-            dlg.ShowDialog();
+            //var dlg = new BlackListDlg(_listBlack);
+            //dlg.ShowDialog();
         }
 
         private void toolStrip1_DragEnter(object sender, DragEventArgs e) {
@@ -276,7 +286,7 @@ namespace SpamFriend{
 
         //友達一覧のリストでダブルクリック
         private void listView_DoubleClick(object sender, EventArgs e){
-            var items = listView.SelectedItems;
+            var items = listViewFriend.SelectedItems;
             if (items.Count > 0){
                 var key = items[0].SubItems[1].Text;
                 textBoxUrl.Text = string.Format("https://www.facebook.com/{0}",key);
@@ -285,5 +295,8 @@ namespace SpamFriend{
             }
 
         }
+
+        
+
     }
 }

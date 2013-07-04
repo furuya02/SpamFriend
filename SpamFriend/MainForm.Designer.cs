@@ -26,6 +26,8 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.progressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.imageListFriend = new System.Windows.Forms.ImageList(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -37,30 +39,43 @@
             this.textBoxUrl = new System.Windows.Forms.ToolStripTextBox();
             this.buttonComfirm = new System.Windows.Forms.ToolStripButton();
             this.buttonBlackList = new System.Windows.Forms.ToolStripButton();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
             this.webBrowser = new System.Windows.Forms.WebBrowser();
-            this.listView = new System.Windows.Forms.ListView();
-            this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.listViewFriend = new System.Windows.Forms.ListView();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.listViewBlack = new System.Windows.Forms.ListView();
             this.statusStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
-            this.tabControl1.SuspendLayout();
+            this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.statusLabel});
+            this.statusLabel,
+            this.progressBar});
             this.statusStrip1.Location = new System.Drawing.Point(0, 538);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(855, 22);
             this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
+            // 
+            // statusLabel
+            // 
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(0, 17);
+            // 
+            // progressBar
+            // 
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(200, 16);
             // 
             // imageListFriend
             // 
@@ -154,7 +169,7 @@
             this.buttonComfirm.Image = ((System.Drawing.Image)(resources.GetObject("buttonComfirm.Image")));
             this.buttonComfirm.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.buttonComfirm.Name = "buttonComfirm";
-            this.buttonComfirm.Size = new System.Drawing.Size(63, 22);
+            this.buttonComfirm.Size = new System.Drawing.Size(62, 22);
             this.buttonComfirm.Text = "Comfirm";
             this.buttonComfirm.Click += new System.EventHandler(this.buttonComfirm_Click);
             // 
@@ -164,20 +179,21 @@
             this.buttonBlackList.Image = ((System.Drawing.Image)(resources.GetObject("buttonBlackList.Image")));
             this.buttonBlackList.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.buttonBlackList.Name = "buttonBlackList";
-            this.buttonBlackList.Size = new System.Drawing.Size(83, 22);
+            this.buttonBlackList.Size = new System.Drawing.Size(82, 22);
             this.buttonBlackList.Text = "BLACK LIST";
             this.buttonBlackList.Click += new System.EventHandler(this.buttonBlackList_Click);
             // 
-            // tabControl1
+            // tabControl
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 25);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(855, 513);
-            this.tabControl1.TabIndex = 17;
+            this.tabControl.Controls.Add(this.tabPage1);
+            this.tabControl.Controls.Add(this.tabPage2);
+            this.tabControl.Controls.Add(this.tabPage3);
+            this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl.Location = new System.Drawing.Point(0, 25);
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(855, 513);
+            this.tabControl.TabIndex = 17;
             // 
             // tabPage1
             // 
@@ -187,19 +203,8 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(847, 487);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
+            this.tabPage1.Text = "Browser";
             this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.listView);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(847, 487);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // panel1
             // 
@@ -221,28 +226,53 @@
             this.webBrowser.TabIndex = 0;
             this.webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_DocumentCompleted);
             // 
-            // listView
+            // tabPage2
             // 
-            this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView.LargeImageList = this.imageListFriend;
-            this.listView.Location = new System.Drawing.Point(3, 3);
-            this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(841, 481);
-            this.listView.TabIndex = 0;
-            this.listView.UseCompatibleStateImageBehavior = false;
-            this.listView.DoubleClick += new System.EventHandler(this.listView_DoubleClick);
+            this.tabPage2.Controls.Add(this.listViewFriend);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(847, 487);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Friends";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // statusLabel
+            // listViewFriend
             // 
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(0, 17);
+            this.listViewFriend.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewFriend.LargeImageList = this.imageListFriend;
+            this.listViewFriend.Location = new System.Drawing.Point(3, 3);
+            this.listViewFriend.Name = "listViewFriend";
+            this.listViewFriend.Size = new System.Drawing.Size(841, 481);
+            this.listViewFriend.TabIndex = 0;
+            this.listViewFriend.UseCompatibleStateImageBehavior = false;
+            this.listViewFriend.DoubleClick += new System.EventHandler(this.listView_DoubleClick);
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.listViewBlack);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(847, 487);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Spam";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // listViewBlack
+            // 
+            this.listViewBlack.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listViewBlack.Location = new System.Drawing.Point(0, 0);
+            this.listViewBlack.Name = "listViewBlack";
+            this.listViewBlack.Size = new System.Drawing.Size(847, 487);
+            this.listViewBlack.TabIndex = 0;
+            this.listViewBlack.UseCompatibleStateImageBehavior = false;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(855, 560);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.tabControl);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.statusStrip1);
             this.Name = "MainForm";
@@ -251,10 +281,11 @@
             this.statusStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            this.tabControl1.ResumeLayout(false);
+            this.tabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabPage2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -274,13 +305,16 @@
         private System.Windows.Forms.ToolStripButton buttonStop;
         private System.Windows.Forms.ToolStripButton buttonComfirm;
         private System.Windows.Forms.ToolStripButton buttonBlackList;
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.WebBrowser webBrowser;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.ListView listView;
+        private System.Windows.Forms.ListView listViewFriend;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
+        private System.Windows.Forms.ToolStripProgressBar progressBar;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.ListView listViewBlack;
     }
 }
 

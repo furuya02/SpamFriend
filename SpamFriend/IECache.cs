@@ -74,9 +74,17 @@ namespace SpamFriend {
 
                 //CheckLastError(url, false);
             } finally {
-                if (buffer.ToInt32() > 0) {
-                    try { Marshal.FreeHGlobal(buffer); } catch { }
-                }
+                //try{
+                    //if (buffer.ToInt32() > 0){
+                        try{
+                            Marshal.FreeHGlobal(buffer);
+                        } catch{
+                        }
+                    //}
+                //} catch{
+                    
+                //}
+
             }
 
             //Debug.Assert(false, "We should either early-return" +" or throw before we get here");
