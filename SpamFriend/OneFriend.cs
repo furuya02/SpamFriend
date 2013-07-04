@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,12 @@ namespace SpamFriend {
         public String Name { get; private set; }
         public String Jpg { get; private set; }
         public String Key { get; private set; }
+        public Image Image { get; private set; }
         public OneFriend() {
             Name = "";
             Jpg = "";
             Key = "";
+            Image = null;
         }
         public bool Parse(String str){
             int i;
@@ -71,6 +74,14 @@ namespace SpamFriend {
             }
             Name = name;
             Jpg = jpg;
+
+            var info = IECache.GetUrlCacheEntryInfo(jpg);
+            
+            try{
+                Image = Image.FromFile(info.lpszLocalFileName);
+            }catch (Exception){
+                Image = null;
+            }
             return true;
 
         }

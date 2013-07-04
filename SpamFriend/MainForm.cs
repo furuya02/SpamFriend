@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace SpamFriend{
@@ -23,7 +24,8 @@ namespace SpamFriend{
 
             textBoxUrl.Text = topUrl;
             timer1.Interval = 500; //500 counter<6
-            buttonHome_Click(null,null);
+            //buttonHome_Click(null,null);
+            buttonRefresh_Click(null,null);
 
         }
 
@@ -78,17 +80,22 @@ namespace SpamFriend{
                     if (i != -1) {
                         textBoxUrl.Text = url.Substring(0, i);
                     }
-                    Target = textBoxUrl.Text.Substring(25);
-                    Text = String.Format("SpamFriend -{0}-", Target);
                 } else {
                     int i = url.IndexOf("?");
                     if (i != -1){
                         textBoxUrl.Text = url.Substring(0, i);
                     }
-                    Target = textBoxUrl.Text.Substring(25);
-                    Text = String.Format("SpamFriend -{0}-", Target);
+                    SetTarget();
                 }
             }
+        }
+
+        void SetTarget(){
+            listView.Items.Clear();
+            imageListFriend.Images.Clear();
+
+            Target = textBoxUrl.Text.Substring(25);
+            Text = String.Format("SpamFriend -{0}-", Target);
         }
 
 
@@ -121,14 +128,44 @@ namespace SpamFriend{
                 //スクロールを一番上に戻す
                 webBrowser.Document.Window.ScrollTo(0, 0);
 
+                //ちょっとTargetのトップを見せてからページを変更する
+                Thread.Sleep(500);
+
                 //ボタン状態
                 ButtonInit(false);
 
                 //友達一覧
                 SearchFriend();
 
-                var dlg = new ComfirmDlg(_listFriend, _listBlack,this);
-                dlg.ShowDialog();
+                //タブを切り替える
+                tabControl1.SelectedIndex = 1;
+
+                //リストビューに展開する
+                var countSpam = 0;
+                var i = 0;
+                foreach (var a in _listFriend) {
+                    var item = listView.Items.Add(a.Name, i++);
+                    item.SubItems.Add(a.Key);
+                    item.SubItems.Add(a.Jpg);
+                    imageListFriend.Images.Add(a.Image);
+                    if (null != _listBlack.Search(a.Key)) {
+                        item.ForeColor = Color.Red;
+                        countSpam++;
+                    }
+
+                }
+                statusLabel.Text = String.Format("すべての友達 {0} スパムアカウント {1}", _listFriend.Count, countSpam);
+                
+                //デバッグ情報
+                var sb = new StringBuilder();
+                foreach (var o in _listFriend) {
+                    var s = String.Format("{0} {1}\r\n", o.Name, o.Key);
+                    sb.Append(s);
+                }
+                Clipboard.SetDataObject(sb.ToString(), true);
+
+                //var dlg = new ComfirmDlg(_listFriend, _listBlack,this);
+                //dlg.ShowDialog();
 
             }
 
@@ -136,6 +173,7 @@ namespace SpamFriend{
 
         void ButtonInit(bool sw){
             if (sw){//検索中
+                statusLabel.Text = "検索中";
                 textBoxUrl.Enabled = false;
                 buttonComfirm.Enabled = false;
                 buttonBack.Enabled = false;
@@ -148,6 +186,7 @@ namespace SpamFriend{
                 panel1.Cursor = Cursors.WaitCursor;
 
             } else{
+                statusLabel.Text = "";
                 textBoxUrl.Enabled = true;
                 buttonComfirm.Enabled = true;
                 buttonBack.Enabled = true;
@@ -167,10 +206,12 @@ namespace SpamFriend{
 
         //戻る
         private void buttonBack_Click(object sender, EventArgs e) {
+            tabControl1.SelectedIndex = 0;
             webBrowser.GoBack();
         }
         //停止
         private void buttonStop_Click(object sender, EventArgs e) {
+            tabControl1.SelectedIndex = 0;
             webBrowser.Stop();
             timer1.Enabled = false;
             ButtonInit(false);
@@ -178,23 +219,29 @@ namespace SpamFriend{
 
         //更新
         private void buttonRefresh_Click(object sender, EventArgs e){
+            tabControl1.SelectedIndex = 0;
             InitTarget(textBoxUrl.Text);
             webBrowser.Navigate(textBoxUrl.Text);
         }
         //ホーム
-        private void buttonHome_Click(object sender, EventArgs e) {
+        private void buttonHome_Click(object sender, EventArgs e){
+            tabControl1.SelectedIndex = 0;
             textBoxUrl.Text = "https://www.facebook.com/";
             webBrowser.Navigate(textBoxUrl.Text);
 
         }
         //進む
         private void buttonForward_Click(object sender, EventArgs e){
+            tabControl1.SelectedIndex = 0;
             webBrowser.GoForward();
         }
         //確認
         private void buttonComfirm_Click(object sender, EventArgs e) {
             //ボタン状態
             ButtonInit(true);
+
+            //タブを切り替える
+            tabControl1.SelectedIndex = 0;
 
             _listFriend.Clear();
             var url = "https://www.facebook.com/friends";
@@ -225,6 +272,18 @@ namespace SpamFriend{
 
         private void toolStrip1_DragDrop(object sender, DragEventArgs e) {
             textBoxUrl.Text = (String)e.Data.GetData(DataFormats.Text);
+        }
+
+        //友達一覧のリストでダブルクリック
+        private void listView_DoubleClick(object sender, EventArgs e){
+            var items = listView.SelectedItems;
+            if (items.Count > 0){
+                var key = items[0].SubItems[1].Text;
+                textBoxUrl.Text = string.Format("https://www.facebook.com/{0}",key);
+                SetTarget();
+                buttonRefresh_Click(null,null);
+            }
+
         }
     }
 }
