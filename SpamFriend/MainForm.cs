@@ -12,7 +12,8 @@ namespace SpamFriend{
 
         private int _size;
         private Color _color;
-        readonly List<OneFriend> _listFriend = new List<OneFriend>();
+        //readonly List<OneFriend> _listFriend = new List<OneFriend>();
+        readonly ListFriend _listFriend;
         readonly ListBlack _listBlack;
         private readonly Progress _progress;
 
@@ -20,6 +21,7 @@ namespace SpamFriend{
             InitializeComponent();
 
             _progress = new Progress(progressBar);
+            _listFriend = new ListFriend(listViewFriend,_progress);
             _listBlack = new ListBlack(listViewBlack);
 
             //const string topUrl = "https://www.facebook.com/toshiyuki.katayama.50/friends";
@@ -42,27 +44,9 @@ namespace SpamFriend{
                 return;
             }
             var body = webBrowser.Document.Body;
-            var s = body.InnerHtml;
-            if (s == null){
-                return;
+            if (body.InnerHtml != null) {
+                _listFriend.Init(body.InnerHtml);
             }
-            var start = s.LastIndexOf("友達を検索");
-            if (start < 0){
-                return;
-            }
-            var target = s.Substring(start);
-
-            const string parseStr = "<div class=\"clearfix\">";
-            var lines = target.Split(new[]{parseStr}, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var l in lines){
-                var o = new OneFriend();
-                if (o.Parse(l)){
-                    _listFriend.Add(o);
-                } else{
-//                    o.Parse(l);
-                }
-            }
-
         }
     
 
@@ -81,14 +65,21 @@ namespace SpamFriend{
 
                 if (url.IndexOf("profile.php?id=") != -1) {
                     int i = url.IndexOf("&");
-                    if (i != -1) {
-                        textBoxUrl.Text = url.Substring(0, i);
+                    if (i != -1){
+                        url = url.Substring(0, i);
                     }
+                    textBoxUrl.Text = url;
+                    SetTarget();
                 } else {
                     int i = url.IndexOf("?");
                     if (i != -1){
-                        textBoxUrl.Text = url.Substring(0, i);
+                        url = url.Substring(0, i);
                     }
+                    i = url.IndexOf("/friend");
+                    if (i != -1) {
+                        url = url.Substring(0, i);
+                    }
+                    textBoxUrl.Text = url;
                     SetTarget();
                 }
             }
@@ -100,6 +91,7 @@ namespace SpamFriend{
 
             Target = textBoxUrl.Text.Substring(25);
             Text = String.Format("SpamFriend -{0}-", Target);
+            buttonComfirm.Text = String.Format("Comfirm -{0}-", Target);
         }
 
 
@@ -144,38 +136,9 @@ namespace SpamFriend{
                 //タブを切り替える
                 tabControl.SelectedIndex = 1;
 
-  
-                //リストビューに展開する
-                _progress.Init(_listFriend.Count);
-
-
-                var countSpam = 0;
-                var i = 0;
-                foreach (var a in _listFriend) {
-                    var item = listViewFriend.Items.Add(a.Name, i++);
-                    item.SubItems.Add(a.Key);
-                    item.SubItems.Add(a.Jpg);
-                    imageListFriend.Images.Add(a.Image);
-                    if (null != _listBlack.Search(a.Key)) {
-                        item.ForeColor = Color.Red;
-                        countSpam++;
-                    }
-                    _progress.Inc();
-                }
-                _progress.Finish();
-
-                statusLabel.Text = String.Format("すべての友達 {0} スパムアカウント {1}", _listFriend.Count, countSpam);
-                
-                //デバッグ情報
-                var sb = new StringBuilder();
-                foreach (var o in _listFriend) {
-                    var s = String.Format("{0} {1}\r\n", o.Name, o.Key);
-                    sb.Append(s);
-                }
-                Clipboard.SetDataObject(sb.ToString(), true);
-
-                //var dlg = new ComfirmDlg(_listFriend, _listBlack,this);
-                //dlg.ShowDialog();
+                //スパムチェック
+                var count = _listFriend.SpamCheck(_listBlack);
+                statusLabel.Text = String.Format("すべての友達 {0} スパムアカウント {1}", _listFriend.Count, count);
 
             }
 

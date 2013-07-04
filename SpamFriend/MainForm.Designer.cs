@@ -38,7 +38,6 @@
             this.buttonHome = new System.Windows.Forms.ToolStripButton();
             this.textBoxUrl = new System.Windows.Forms.ToolStripTextBox();
             this.buttonComfirm = new System.Windows.Forms.ToolStripButton();
-            this.buttonBlackList = new System.Windows.Forms.ToolStripButton();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -98,8 +97,7 @@
             this.buttonStop,
             this.buttonHome,
             this.textBoxUrl,
-            this.buttonComfirm,
-            this.buttonBlackList});
+            this.buttonComfirm});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(855, 25);
@@ -161,7 +159,7 @@
             // textBoxUrl
             // 
             this.textBoxUrl.Name = "textBoxUrl";
-            this.textBoxUrl.Size = new System.Drawing.Size(500, 25);
+            this.textBoxUrl.Size = new System.Drawing.Size(400, 25);
             // 
             // buttonComfirm
             // 
@@ -172,16 +170,6 @@
             this.buttonComfirm.Size = new System.Drawing.Size(62, 22);
             this.buttonComfirm.Text = "Comfirm";
             this.buttonComfirm.Click += new System.EventHandler(this.buttonComfirm_Click);
-            // 
-            // buttonBlackList
-            // 
-            this.buttonBlackList.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.buttonBlackList.Image = ((System.Drawing.Image)(resources.GetObject("buttonBlackList.Image")));
-            this.buttonBlackList.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.buttonBlackList.Name = "buttonBlackList";
-            this.buttonBlackList.Size = new System.Drawing.Size(82, 22);
-            this.buttonBlackList.Text = "BLACK LIST";
-            this.buttonBlackList.Click += new System.EventHandler(this.buttonBlackList_Click);
             // 
             // tabControl
             // 
@@ -304,7 +292,6 @@
         private System.Windows.Forms.ToolStripButton buttonHome;
         private System.Windows.Forms.ToolStripButton buttonStop;
         private System.Windows.Forms.ToolStripButton buttonComfirm;
-        private System.Windows.Forms.ToolStripButton buttonBlackList;
         private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.Panel panel1;

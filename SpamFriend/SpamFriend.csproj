@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="IECache.cs" />
     <Compile Include="ListBlack.cs" />
+    <Compile Include="ListFriend.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
